@@ -1,0 +1,133 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>macOS Firefox platform integration priorities</title>
+    <meta name="description" content="A tool to prioritize platform integration work for Mozilla Firefox on macOS">
+    <meta name="author" content="Stephen A Pohl [:spohl]">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+      #sortable-priorities { margin: 40; padding: 0; width: 90%; }
+      #sortable-priorities li { margin: 0 3px 3px 30px; padding: 0.4em; padding-left: 1.5em; font-size: 0.8em; height: 18px; }
+      #sortable-priorities li span { position: absolute; margin-left: -1.3em; }
+      #sortable-backlog { margin: 40; padding: 0; width: 90%; }
+      #sortable-backlog li { margin: 0 3px 3px 30px; padding: 0.4em; padding-left: 1.5em; font-size: 0.8em; height: 18px; }
+      #sortable-backlog li span { position: absolute; margin-left: -1.3em; }
+      #sortable-done { margin: 40; padding: 0; width: 90%; }
+      #sortable-done li { margin: 0 3px 3px 30px; padding: 0.4em; padding-left: 1.5em; font-size: 0.8em; height: 18px; }
+      #sortable-done li span { position: absolute; margin-left: -1.3em; }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        table {
+          font-size: 1em;
+      }
+      .ui-draggable, .ui-droppable {
+        background-position: top;
+      }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/client.js"></script>
+    <script>
+      $(function() {
+        $("#sortable-priorities").sortable({
+          stop: (event, ui) => {
+            synchronizePrioritizedBugs();
+          },
+        });
+        $("#sortable-priorities").disableSelection();
+        $("#sortable-backlog").sortable({
+          stop: (event, ui) => {
+            synchronizeBacklogBugs();
+          },
+        });
+        $("#sortable-backlog").disableSelection();
+      });
+      
+      function validateBugId(aBugId) {
+        return /^\d+$/.test(aBugId);
+      }
+      
+      function validateAndSubmitBugId() {
+        var bugId = document.getElementById("individualBugId").value;
+        // Check if this could be a valid bug ID
+        if (validateBugId(bugId)) {
+          addIndividualBug(bugId);
+        } else {
+          alert("\"" + bugId + "\" does not appear to be a valid bug ID.");
+        }
+      }
+
+      function validateAndSubmitSecurityBugId() {
+        var bugId = document.getElementById("individualSecurityBugId").value;
+        // Check if this could be a valid bug ID
+        if (validateBugId(bugId)) {
+          addIndividualSecurityBug(bugId);
+        } else {
+          alert("\"" + bugId + "\" does not appear to be a valid bug ID.");
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div align="right">:spohl</div>
+      <h1><center>macOS Firefox platform integration priorities</center></h1>
+    </header>
+
+    <main>
+
+      <!-- start admin dashboard -->
+      <button id="backlog-regenerate-button" onclick="fetchBugList()" hidden="true">Fetch P1 & P2 bugs from bugzilla</button>&nbsp;&nbsp;
+      <button id="save-button" onclick="saveBugList()" hidden="true">Save order</button><br/><br/>
+      <form id="add-individual-bug" onsubmit="return false;" hidden="true">
+        <input type="text" id="individualBugId" />&nbsp;&nbsp;<input type="submit" value="Add individual bug" onclick="validateAndSubmitBugId()"/>
+      </form><br/>
+      <form id="add-individual-security-bug" onsubmit="return false;" hidden="true">
+        <input type="text" id="individualSecurityBugId" />&nbsp;&nbsp;<input type="submit" value="Add individual security bug" onclick="validateAndSubmitSecurityBugId()"/>
+      </form>
+      <!-- end admin dashboard -->
+
+      <h2>
+        Priorities
+      </h2>
+      <section class="priorities">
+        <ol id="sortable-priorities">
+
+        </ol>
+      </section>
+
+      <h2>
+        Backlog<br/>
+      </h2>
+      
+      <section class="backlog">
+        <ul id="sortable-backlog">
+        </ul>
+      </section>
+      
+      <h2>
+        Done
+      </h2>
+      
+      <section class="done">
+        <ul id="sortable-done">
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <div align="center">
+        Questions & comments: <a href="mailto:spohl.mozilla.bugs [at] gmail.com">[:spohl]</a>
+      </div>
+    </footer>
+  </body>
+</html>
